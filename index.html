@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>可莉女孩應援榜即時排名</title>
-<meta name="description" content="可莉女孩應援榜 40 位參賽者即時票數排名，每 30 秒自動更新。">
+<title>可莉女孩即時排名</title>
+<meta name="description" content="17LIVE 可莉女孩：應援榜、人氣投票與總積分即時排名，每 30 秒自動更新。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <style>
-/* Layout: scoreboard — sticky status bar, focus card, then one dense ranking list */
+/* Layout: scoreboard — sticky status bar + tabs, focus card, then one dense ranking list */
 :root{
   --bg:#f3f5f9; --surface:#ffffff; --fg:#141a26; --muted:#5f6779; --line:#e1e5ee;
-  --navy:#0b1e3a; --on-navy:#ffffff; --accent:#0b5cd6; --gold:#f2b705; --hl:#fff6d1;
-  --up:#d93025; --down:#188038; --warn:#b3261e; --flash:#dceaff;
+  --navy:#0b1e3a; --on-navy:#ffffff; --accent:#0b5cd6; --gold:#e0a800; --hl:#fff6d1;
+  --up:#d93025; --down:#188038; --warn:#b3261e; --flash:#dceaff; --cut:#0b5cd6;
   --sans:"Noto Sans TC",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
   --num:"Barlow Condensed","Arial Narrow",var(--sans);
   color-scheme:light;
@@ -21,46 +21,56 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0d1118; --surface:#161b25; --fg:#e7eaf1; --muted:#97a0b3; --line:#262d3b;
   --navy:#13284d; --on-navy:#ffffff; --accent:#7fb0ff; --gold:#f2c230; --hl:#3a3218;
-  --up:#ff7a6e; --down:#5fd38a; --warn:#ff8a80; --flash:#1e3358; color-scheme:dark}}
+  --up:#ff7a6e; --down:#5fd38a; --warn:#ff8a80; --flash:#1e3358; --cut:#7fb0ff; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0d1118; --surface:#161b25; --fg:#e7eaf1; --muted:#97a0b3; --line:#262d3b;
   --navy:#13284d; --on-navy:#ffffff; --accent:#7fb0ff; --gold:#f2c230; --hl:#3a3218;
-  --up:#ff7a6e; --down:#5fd38a; --warn:#ff8a80; --flash:#1e3358; color-scheme:dark}
+  --up:#ff7a6e; --down:#5fd38a; --warn:#ff8a80; --flash:#1e3358; --cut:#7fb0ff; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans);-webkit-text-size-adjust:100%}
-.wrap{max-width:720px;margin:0 auto;padding-inline:16px}
-.num{font-family:var(--num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
 
 header.top{background:var(--navy);color:var(--on-navy);padding-top:env(safe-area-inset-top,0px)}
-header.top .wrap{padding-block:18px 16px;display:flex;flex-direction:column;gap:2px}
+header.top .wrap{padding-block:18px 14px;display:flex;flex-direction:column;gap:2px}
 h1{margin:0;font-size:1.3rem;line-height:1.3;text-wrap:balance}
-.period{font-size:13px;opacity:.75}
+.period{font-size:13px;opacity:.78}
 
 .bar{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
-.bar .wrap{display:flex;align-items:center;gap:10px;padding-block:8px;font-size:13px;color:var(--muted)}
+.bar .wrap{display:flex;flex-direction:column;gap:6px;padding-block:8px}
+.status{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--down);flex:none}
 .dot.off{background:var(--muted)}.dot.err{background:var(--warn)}
 #status{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-button{font:inherit;cursor:pointer}
-.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 12px;font-size:13px}
+button{font:inherit;cursor:pointer;color:inherit}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 12px;font-size:13px;white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);border-radius:10px;padding:3px}
+.tab{border:0;background:transparent;border-radius:8px;padding:6px 4px;font-size:14px;font-weight:500;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 button:focus-visible,input:focus-visible,.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 main{display:flex;flex-direction:column;gap:14px;padding-block:14px 40px}
 
-.focus{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
-.focus .rk{grid-row:span 2;font:700 44px/1 var(--num);color:var(--navy);min-width:2ch;text-align:center}
-:root[data-theme="dark"] .focus .rk{color:var(--gold)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .focus .rk{color:var(--gold)}}
-.focus .who{font-weight:700;font-size:16px;min-width:0;overflow-wrap:anywhere}
-.focus .who small{font-weight:400;color:var(--muted);margin-left:6px;font-size:12px}
-.focus .votes{font:600 22px/1.1 var(--num)}
-.gaps{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;border-top:1px solid var(--line);padding-top:10px}
-.gap{display:flex;flex-direction:column;gap:0}
-.gap span{font-size:12px;color:var(--muted)}
-.gap b{font:600 19px/1.2 var(--num)}
-.focus .hint{grid-column:1/-1;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.focus{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.fhead{display:flex;align-items:center;gap:14px}
+.fhead .rk{font:700 44px/1 var(--num);color:var(--navy);min-width:2ch;text-align:center}
+:root[data-theme="dark"] .fhead .rk{color:var(--gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fhead .rk{color:var(--gold)}}
+.fhead .who{min-width:0;display:flex;flex-direction:column}
+.fhead .who b{font-size:16px;overflow-wrap:anywhere}
+.fhead .who span{font-size:13px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.chip.in{background:var(--down);color:var(--surface)}
+.chip.out{background:var(--line);color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border-top:1px solid var(--line);padding-top:10px}
+.fbox{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fbox .lbl{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.fbox .big{font:600 20px/1.2 var(--num)}
+.fbox .sub{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.fbox .sub b{color:var(--fg);font-weight:500}
+.fhint{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
 .linkbtn{border:0;background:none;color:var(--accent);padding:0;font-size:12px}
 
 .tools{display:flex;gap:8px;align-items:center}
@@ -68,7 +78,10 @@ main{display:flex;flex-direction:column;gap:14px;padding-block:14px 40px}
 .total{font-size:12px;color:var(--muted);white-space:nowrap}
 
 .board{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.head,.row{display:grid;grid-template-columns:3.2rem minmax(0,1fr) 5.6rem 4.6rem 2.6rem;align-items:center;gap:6px;padding:0 12px}
+.head,.row{display:grid;align-items:center;gap:6px;padding:0 12px}
+.board[data-view="sum"] .head,.board[data-view="sum"] .row{grid-template-columns:3rem minmax(0,1fr) 3.2rem 4.6rem 4.6rem}
+.board[data-view="gift"] .head,.board[data-view="gift"] .row,
+.board[data-view="pop"] .head,.board[data-view="pop"] .row{grid-template-columns:3.2rem minmax(0,1fr) 5.4rem 4.4rem 2.6rem}
 .head{font-size:12px;color:var(--muted);padding-block:8px;border-bottom:1px solid var(--line);background:var(--bg)}
 .head span:nth-child(n+3),.row .r{text-align:right}
 .row{padding-block:9px;border-bottom:1px solid var(--line);cursor:pointer;transition:background-color .6s}
@@ -76,6 +89,8 @@ main{display:flex;flex-direction:column;gap:14px;padding-block:14px 40px}
 .row:hover{background:var(--bg)}
 .row.me{background:var(--hl)}
 .row.flash{background:var(--flash);transition:none}
+.row.cut{border-bottom:2px dashed var(--cut)}
+.cutlbl{padding:4px 12px;font-size:12px;color:var(--cut);background:var(--bg);border-bottom:1px solid var(--line)}
 .pos{display:flex;align-items:baseline;gap:3px;white-space:nowrap}
 .pos b{font:700 20px/1 var(--num);min-width:1.4ch;text-align:right}
 .row.t1 .pos b{color:var(--gold)}
@@ -87,35 +102,49 @@ main{display:flex;flex-direction:column;gap:14px;padding-block:14px 40px}
 .d{font:500 14px/1 var(--num);color:var(--muted)}
 .d.plus{color:var(--accent)}
 .p{font:500 15px/1 var(--num);color:var(--muted)}
+.pair{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.pair b{font:600 16px/1 var(--num)}
+.pair small{font:500 12px/1.2 var(--num);color:var(--muted)}
+.score{font:700 20px/1 var(--num)}
+.tie{font-size:10px;color:var(--muted);font-weight:400}
 .empty{padding:28px 16px;text-align:center;color:var(--muted)}
 
 footer{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 footer a{color:var(--accent)}
 
 @media (max-width:480px){
-  .head,.row{grid-template-columns:2.7rem minmax(0,1fr) 4.8rem 3.9rem;padding:0 10px}
-  .head span:nth-child(5),.row .p{display:none}
-  .gaps{grid-template-columns:repeat(3,1fr)}
-  .focus .rk{font-size:38px}
+  .board[data-view="gift"] .head,.board[data-view="gift"] .row,
+  .board[data-view="pop"] .head,.board[data-view="pop"] .row{grid-template-columns:2.7rem minmax(0,1fr) 4.6rem 3.8rem;padding:0 10px}
+  .board[data-view="gift"] .head span:nth-child(5),.board[data-view="gift"] .row .p,
+  .board[data-view="pop"] .head span:nth-child(5),.board[data-view="pop"] .row .p{display:none}
+  .board[data-view="sum"] .head,.board[data-view="sum"] .row{grid-template-columns:2.6rem minmax(0,1fr) 2.8rem 3.6rem 3.6rem;padding:0 10px}
+  .fhead .rk{font-size:38px}
 }
 @media (prefers-reduced-motion:reduce){.row{transition:none}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <h1>可莉女孩應援榜・即時排名</h1>
-  <div class="period">活動期間 10/1–10/13　資料來源：17LIVE 公開票數</div>
+  <h1>可莉女孩・即時排名</h1>
+  <div class="period">投票期間 10/1 18:00 – 10/13 23:59　總積分 = 應援榜積分 + 人氣投票積分，前 20 名晉級實體徵選</div>
 </div></header>
 
 <div class="bar"><div class="wrap">
-  <span class="dot off" id="dot"></span>
-  <span id="status">讀取中…</span>
-  <button class="btn" id="refresh" type="button">立即更新</button>
+  <div class="status">
+    <span class="dot off" id="dot"></span>
+    <span id="status">讀取中…</span>
+    <button class="btn" id="refresh" type="button">立即更新</button>
+  </div>
+  <div class="tabs" role="tablist" aria-label="排行榜">
+    <button class="tab" role="tab" type="button" data-view="sum" id="tab-sum">總積分</button>
+    <button class="tab" role="tab" type="button" data-view="gift" id="tab-gift">應援榜</button>
+    <button class="tab" role="tab" type="button" data-view="pop" id="tab-pop">人氣投票</button>
+  </div>
 </div></div>
 
 <div class="wrap"><main>
   <section class="focus" id="focus" aria-live="polite">
-    <div class="rk num">–</div><div class="who">讀取中…</div><div class="votes num">&nbsp;</div>
+    <div class="fhead"><div class="rk num">–</div><div class="who"><b>讀取中…</b></div></div>
   </section>
 
   <div class="tools">
@@ -123,28 +152,35 @@ footer a{color:var(--accent)}
     <span class="total" id="total"></span>
   </div>
 
-  <section class="board" aria-label="票數排名">
-    <div class="head"><span>名次</span><span>號碼・名稱</span><span>票數</span><span title="這次打開頁面之後增加的票數">開頁後</span><span>積分</span></div>
+  <section class="board" id="board" data-view="sum" aria-label="排名">
+    <div class="head" id="head"></div>
     <div id="list"><div class="empty">讀取中…</div></div>
   </section>
 
   <footer>
-    <span>每 30 秒自動更新；切到其他分頁時暫停，回來會立刻更新。點任一列可設為關注對象。</span>
-    <span>「開頁後」是你這次打開頁面之後增加的票數。積分依名次換算，同票者並列同名次、同積分，僅供參考，以官方公布為準。</span>
+    <span>每 30 秒自動更新；切到其他分頁時暫停，回來會立刻更新。點任一列可設為關注對象，網址加 #號碼（例如 #28）可分享指定參賽者。</span>
+    <span>積分依名次換算（第 1 名 50 分 … 第 40 名 1 分），兩榜相同。人氣投票名次直接採用官方排名（同票時較早達到者在前）；應援榜同票時暫以號碼小者在前。總積分同分者並列。以上為非官方試算，結果以 17LIVE 公告為準。</span>
+    <span>「開頁後」是你這次打開頁面之後增加的票數，▲▼ 是這段時間的名次變化。</span>
+    <span><a href="bookmarklet.html">在 17LIVE 頁面用的書籤版</a></span>
   </footer>
 </main></div>
 
 <script>
 (() => {
-  const IDS = ["cd9c987f-d87d-4a91-84d5-c7b5d2c922ee","ec816dd4-905e-436d-9bad-8342b653c06d","05335f5d-fde7-4dd0-a630-78c81ca9c99c","ca7e77ab-4139-4a20-8b17-67662ce79d02","e17439eb-1d5e-46eb-81be-7fb6036ff2f5","c691dadd-c50d-4752-8789-eaf0f58ffa64","36e02a3a-faca-4c4f-8d61-6b2667a08068","e4cecdcc-3d8b-4038-8e89-5b717126cf9c","b961dbf8-6207-4a60-a752-5a05ff22095a","29273e41-84b5-4309-9225-0b3c8c26bed7","f4f636c7-f64f-4fe7-851f-e630f3bf8896","8813ecbc-fd0f-4812-b89f-ee7de90495d6","19eaa30b-9f4c-4910-90ad-34ea964d09c4","61a58914-c0d3-46e3-aef8-b86f7838937a","e09cf3ec-2295-4a1b-ae83-d9a34615cca5","aedb367a-677d-45fc-a6cc-a20104ee54dc","8a8f773d-791e-43a0-805f-d3db5b58bc88","1464bd38-5931-4645-b045-cb2015a74092","429a8d94-facc-41d9-a1fa-5311e82fbd83","b3058a80-1f1f-4c64-8392-bd2f0fa94f6c","2fd746fd-56e4-4698-902d-39c2090e868a","0935cb56-9add-4383-a5a4-3299979cb3c1","857caa94-14c3-453e-846a-cdb24077be74","998fe7cf-497f-4931-9ff0-ca22f192eaa3","032adacf-fc60-4376-845b-1cf6a052466b","57c7f76e-ce8b-4bc2-bbbb-358974f246db","44cce211-cd14-41d7-93c3-d69494f718ff","5d186df7-27f4-478a-8580-322503a58e9a","10fbeb47-f1ef-470a-a8fa-ba1dc977b7b3","afe8f71d-8815-4b74-883f-6c877dbe7c28","6e009d11-03d2-4b35-ab57-2c2c7602d7dd","9efadb25-e259-4f65-9b53-2c994fb20bec","de994b8a-d756-4b10-a9c3-62328b780ce4","9e0810c9-bc70-475b-ba14-162e67d4efc7","fd5e1f1c-fa1b-4748-8b02-5fd6963692c1","274951cc-9e17-4256-b5f1-579b1388eb2c","cbdb1390-ce17-44b1-8246-3fc4fc72d32c","13c70033-c028-4ed3-8ed9-84d8947dc089","444d9f95-faa6-466d-a2e7-ab419be694cc","2e296031-37ee-42c5-ade6-ed9bf06eda2f"];
+  // 應援榜：每位參賽者的 17LIVE 應援容器 ID，依 1–40 號排列
+  const GIFT_IDS = ["cd9c987f-d87d-4a91-84d5-c7b5d2c922ee","ec816dd4-905e-436d-9bad-8342b653c06d","05335f5d-fde7-4dd0-a630-78c81ca9c99c","ca7e77ab-4139-4a20-8b17-67662ce79d02","e17439eb-1d5e-46eb-81be-7fb6036ff2f5","c691dadd-c50d-4752-8789-eaf0f58ffa64","36e02a3a-faca-4c4f-8d61-6b2667a08068","e4cecdcc-3d8b-4038-8e89-5b717126cf9c","b961dbf8-6207-4a60-a752-5a05ff22095a","29273e41-84b5-4309-9225-0b3c8c26bed7","f4f636c7-f64f-4fe7-851f-e630f3bf8896","8813ecbc-fd0f-4812-b89f-ee7de90495d6","19eaa30b-9f4c-4910-90ad-34ea964d09c4","61a58914-c0d3-46e3-aef8-b86f7838937a","e09cf3ec-2295-4a1b-ae83-d9a34615cca5","aedb367a-677d-45fc-a6cc-a20104ee54dc","8a8f773d-791e-43a0-805f-d3db5b58bc88","1464bd38-5931-4645-b045-cb2015a74092","429a8d94-facc-41d9-a1fa-5311e82fbd83","b3058a80-1f1f-4c64-8392-bd2f0fa94f6c","2fd746fd-56e4-4698-902d-39c2090e868a","0935cb56-9add-4383-a5a4-3299979cb3c1","857caa94-14c3-453e-846a-cdb24077be74","998fe7cf-497f-4931-9ff0-ca22f192eaa3","032adacf-fc60-4376-845b-1cf6a052466b","57c7f76e-ce8b-4bc2-bbbb-358974f246db","44cce211-cd14-41d7-93c3-d69494f718ff","5d186df7-27f4-478a-8580-322503a58e9a","10fbeb47-f1ef-470a-a8fa-ba1dc977b7b3","afe8f71d-8815-4b74-883f-6c877dbe7c28","6e009d11-03d2-4b35-ab57-2c2c7602d7dd","9efadb25-e259-4f65-9b53-2c994fb20bec","de994b8a-d756-4b10-a9c3-62328b780ce4","9e0810c9-bc70-475b-ba14-162e67d4efc7","fd5e1f1c-fa1b-4748-8b02-5fd6963692c1","274951cc-9e17-4256-b5f1-579b1388eb2c","cbdb1390-ce17-44b1-8246-3fc4fc72d32c","13c70033-c028-4ed3-8ed9-84d8947dc089","444d9f95-faa6-466d-a2e7-ab419be694cc","2e296031-37ee-42c5-ade6-ed9bf06eda2f"];
   const NAMES = ["小玉","Yuetching627","哇系阿璇","小菜kristar","LyXi","百軒Miya","七依","Nikki_tzu.yu","切里Cherry","可鹽可甜Bona","李柒柒77","Yuni","吉拿Daily","奈奈大王","程茵","IRENE","陳玉婷yuting","恩玖","gii_0520","蘿拉Laura","布丁Purin","凡妮莎莎Vanessa","Tinana","小李子Yoni","mei.mei0601","ycyc_1010","e.mmmilk_","玟玟來啦","kapo6744","jieyuuuuu_","soyun257","悠悠","群群Chunni","Mina6627","Elsa.0104_","琪Qiyana","沛沛bae","Yoyo老師","珈珈出沒","iam豫晴兒"];
   const POINTS = [50,47,44,41,38,35,33,31,29,27,25,24,23,22,21,20,19,18,17,16,16,15,14,13,12,11,10,9,8,7,6,5,4,4,3,3,2,2,1,1];
-  const API = id => "https://fireant.17app.co/api/v1/public/containers/" + id + "/summary";
-  const INTERVAL = 30;
-  const N = IDS.length;
+  const GIFT_API = id => "https://fireant.17app.co/api/v1/public/containers/" + id + "/summary";
+  // 人氣投票：官方排名快照；candidateId = 110 + 號碼
+  const POP_API = "https://cheerleaders.17.live/api/public/rank/snapshot?eventId=6&top=40";
+  const POP_ID_OFFSET = 110;
+  const CUTOFF = 20, INTERVAL = 30, N = NAMES.length;
 
   const $ = s => document.querySelector(s);
   const fmt = n => n.toLocaleString("en-US");
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const pts = r => POINTS[r - 1] || 0;
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -152,93 +188,187 @@ footer a{color:var(--accent)}
 
   const fromHash = () => { const m = location.hash.match(/^#(\d{1,2})$/); const n = m ? +m[1] : 0; return n >= 1 && n <= N ? n : 0; };
   let focus = fromHash() || store.get("kl_focus", 28);
-  let votes = null, prev = null, base = null, baseRank = null, lastOk = 0, failing = false, timer = 0, countdown = INTERVAL, loading = false;
+  let view = store.get("kl_view", "sum");
+  if (!["sum", "gift", "pop"].includes(view)) view = "sum";
 
-  // standard competition ranking: ties share the higher rank (1,2,2,4)
-  const rankOf = v => { const r = []; for (let i = 0; i < N; i++) { let k = 1; for (let j = 0; j < N; j++) if (v[j] > v[i]) k++; r[i] = k; } return r; };
-  const order = v => v.map((_, i) => i).sort((a, b) => v[b] - v[a] || a - b);
+  // per-board state: votes, official/computed rank, baseline at page open, previous poll
+  const boards = {
+    gift: { votes: null, rank: null, prev: null, base: null, baseRank: null, ok: 0 },
+    pop:  { votes: null, rank: null, prev: null, base: null, baseRank: null, ok: 0 }
+  };
+  let lastOk = 0, failing = "", countdown = INTERVAL, loading = false, baseSumRank = null;
+
+  // strict positions 1..N: higher votes first, ties broken by lower number
+  const positions = v => { const o = v.map((_, i) => i).sort((a, b) => v[b] - v[a] || a - b), r = []; o.forEach((k, p) => (r[k] = p + 1)); return r; };
+
+  async function fetchGift() {
+    const res = await Promise.all(GIFT_IDS.map(id =>
+      fetch(GIFT_API(id), { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(j => typeof j.total === "number" ? j.total : Promise.reject("no total")).catch(() => null)));
+    if (res.some(v => v === null)) throw new Error("gift");
+    return { votes: res, rank: positions(res) };
+  }
+  async function fetchPop() {
+    const j = await fetch(POP_API, { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject(r.status));
+    const votes = new Array(N).fill(null), rank = new Array(N).fill(null);
+    for (const t of (j && j.top) || []) {
+      const i = +t.candidateId - POP_ID_OFFSET - 1;
+      if (i >= 0 && i < N && typeof t.voteCount === "number") { votes[i] = t.voteCount; rank[i] = +t.rank; }
+    }
+    if (votes.some(v => v === null) || rank.some(r => !r)) throw new Error("pop");
+    return { votes, rank };
+  }
 
   async function load() {
     if (loading) return;
     loading = true;
     $("#dot").className = "dot off";
-    const res = await Promise.all(IDS.map(id =>
-      fetch(API(id), { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject(r.status))
-        .then(j => typeof j.total === "number" ? j.total : Promise.reject("no total")).catch(() => null)));
-    loading = false;
-    countdown = INTERVAL;
-    if (res.some(v => v === null)) { failing = true; renderStatus(); return; }
-    failing = false; lastOk = Date.now();
-    prev = votes; votes = res;
-    if (!base) { base = res.slice(); baseRank = rankOf(res); }
+    const [g, p] = await Promise.allSettled([fetchGift(), fetchPop()]);
+    loading = false; countdown = INTERVAL;
+    const fails = [];
+    [["gift", g], ["pop", p]].forEach(([k, r]) => {
+      const b = boards[k];
+      if (r.status !== "fulfilled") { fails.push(k === "gift" ? "應援榜" : "人氣投票"); return; }
+      b.prev = b.votes; b.votes = r.value.votes; b.rank = r.value.rank; b.ok = Date.now();
+      if (!b.base) { b.base = b.votes.slice(); b.baseRank = b.rank.slice(); }
+    });
+    failing = fails.join("、");
+    if (boards.gift.ok || boards.pop.ok) lastOk = Math.max(boards.gift.ok, boards.pop.ok);
+    if (!baseSumRank && boards.gift.base && boards.pop.base) baseSumRank = sumOf(boards.gift.baseRank, boards.pop.baseRank).rank;
     render();
+  }
+
+  // combined score; shared rank for equal totals (1,2,2,4)
+  function sumOf(gr, pr) {
+    const s = gr.map((r, i) => pts(r) + pts(pr[i]));
+    const rank = s.map(v => 1 + s.filter(x => x > v).length);
+    return { score: s, rank };
   }
 
   function renderStatus() {
     const dot = $("#dot"), st = $("#status");
+    const time = lastOk ? new Date(lastOk).toLocaleTimeString("zh-TW", { hour12: false }) : "";
     if (failing) {
       dot.className = "dot err";
-      st.textContent = (lastOk ? "更新失敗，顯示 " + new Date(lastOk).toLocaleTimeString("zh-TW", { hour12: false }) + " 的資料" : "讀取失敗") + "，" + countdown + " 秒後重試";
+      st.textContent = failing + " 讀取失敗" + (time ? "，顯示 " + time + " 的資料" : "") + "，" + countdown + " 秒後重試";
       return;
     }
     if (!lastOk) return;
     const paused = document.hidden;
     dot.className = paused ? "dot off" : "dot";
-    st.textContent = "更新於 " + new Date(lastOk).toLocaleTimeString("zh-TW", { hour12: false }) + (paused ? "　已暫停" : "　" + countdown + " 秒後更新");
+    st.textContent = "更新於 " + time + (paused ? "　已暫停" : "　" + countdown + " 秒後更新");
   }
+
+  const ready = k => !!boards[k].votes;
 
   function render() {
     renderStatus();
-    const rank = rankOf(votes), ord = order(votes);
-    $("#total").textContent = "總票數 " + fmt(votes.reduce((a, b) => a + b, 0));
-
-    // focus card
-    const i = focus - 1, pos = ord.indexOf(i);
-    const above = pos > 0 ? ord[pos - 1] : -1, below = pos < N - 1 ? ord[pos + 1] : -1;
-    const gained = votes[i] - base[i];
-    $("#focus").innerHTML =
-      '<div class="rk num">' + rank[i] + '</div>' +
-      '<div class="who">' + focus + ' 號　' + esc(NAMES[i]) + '<small>第 ' + rank[i] + ' 名・積分 ' + POINTS[rank[i] - 1] + '</small></div>' +
-      '<div class="votes num">' + fmt(votes[i]) + ' 票</div>' +
-      '<div class="gaps">' +
-        gapCell("距上一名", above < 0 ? "已是第一" : votes[above] === votes[i] ? "同票" : fmt(votes[above] - votes[i]) + " 票", above >= 0 ? (above + 1) + " 號 " + NAMES[above] : "") +
-        gapCell("領先下一名", below < 0 ? "–" : votes[below] === votes[i] ? "同票" : fmt(votes[i] - votes[below]) + " 票", below >= 0 ? (below + 1) + " 號 " + NAMES[below] : "") +
-        gapCell("開頁後增加", (gained > 0 ? "+" : "") + fmt(gained) + " 票", "") +
-      '</div>' +
-      '<div class="hint"><span>點下方任一列可換關注對象</span><button class="linkbtn" type="button" id="share">複製這位的分享連結</button></div>';
-
-    // list
-    const q = $("#q").value.trim().toLowerCase();
-    let html = "";
-    for (const k of ord) {
-      const no = k + 1;
-      if (q && !(String(no) === q || NAMES[k].toLowerCase().includes(q))) continue;
-      const mv = baseRank[k] - rank[k];
-      const d = votes[k] - base[k];
-      const flash = prev && votes[k] !== prev[k];
-      html += '<div class="row' + (no === focus ? " me" : "") + (rank[k] === 1 ? " t1" : "") + (flash ? " flash" : "") + '" data-n="' + no + '" tabindex="0" role="button" aria-label="' + no + ' 號 ' + esc(NAMES[k]) + '，第 ' + rank[k] + ' 名，' + votes[k] + ' 票">' +
-        '<div class="pos"><b>' + rank[k] + '</b>' + (mv > 0 ? '<span class="mv up">▲' + mv + '</span>' : mv < 0 ? '<span class="mv dn">▼' + (-mv) + '</span>' : "") + '</div>' +
-        '<div class="name"><b>' + esc(NAMES[k]) + '</b><small>' + no + ' 號</small></div>' +
-        '<div class="r v">' + fmt(votes[k]) + '</div>' +
-        '<div class="r d' + (d > 0 ? " plus" : "") + '">' + (d > 0 ? "+" + fmt(d) : "–") + '</div>' +
-        '<div class="r p">' + POINTS[rank[k] - 1] + '</div></div>';
-    }
-    $("#list").innerHTML = html || '<div class="empty">找不到符合的參賽者</div>';
-    if (prev) requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll(".row.flash").forEach(r => r.classList.remove("flash"))));
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === view)));
+    $("#board").dataset.view = view;
+    renderFocus();
+    renderList();
   }
 
-  const gapCell = (label, value, sub) => '<div class="gap"><span>' + label + '</span><b>' + value + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : "") + '</div>';
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function renderFocus() {
+    const i = focus - 1, G = boards.gift, P = boards.pop;
+    const haveBoth = ready("gift") && ready("pop");
+    const sum = haveBoth ? sumOf(G.rank, P.rank) : null;
+    const sumRank = sum ? sum.rank[i] : null;
+    const cutScore = sum ? sum.score.slice().sort((a, b) => b - a)[CUTOFF - 1] : null;
+
+    let head = '<div class="fhead"><div class="rk num">' + (sumRank || "–") + '</div><div class="who"><b>' + focus + ' 號　' + esc(NAMES[i]) +
+      (sum ? (sumRank <= CUTOFF ? '<span class="chip in">晉級線內</span>' : '<span class="chip out">晉級線外</span>') : "") + '</b><span>' +
+      (sum ? "總積分 " + sum.score[i] + " 分・總排名第 " + sumRank + " 名" + (sum.rank.filter(r => r === sumRank).length > 1 ? "（並列）" : "") : "總積分需要兩個榜都讀到才能計算") +
+      '</span></div></div>';
+
+    const box = (label, k) => {
+      const b = boards[k];
+      if (!b.votes) return '<div class="fbox"><span class="lbl">' + label + '</span><span class="big">讀取中</span></div>';
+      const r = b.rank[i], above = b.rank.indexOf(r - 1), gain = b.votes[i] - b.base[i];
+      let up = "";
+      if (r === 1) up = "目前第一名";
+      else if (above >= 0) {
+        // gift ties go to the lower number; pop ties go to whoever got there first, so equal votes isn't enough
+        const need = b.votes[above] - b.votes[i] + (k === "pop" || above < i ? 1 : 0);
+        up = "再 <b>" + fmt(Math.max(need, 1)) + "</b> 票可升第 " + (r - 1) + " 名（+" + (pts(r - 1) - pts(r)) + " 分）";
+      }
+      return '<div class="fbox"><span class="lbl">' + label + '</span>' +
+        '<span class="big">第 ' + r + ' 名・' + pts(r) + ' 分</span>' +
+        '<span class="sub">' + fmt(b.votes[i]) + ' 票' + (gain > 0 ? "，開頁後 +" + fmt(gain) : "") + '</span>' +
+        '<span class="sub">' + up + '</span></div>';
+    };
+
+    let extra = "";
+    if (sum) {
+      extra = sumRank <= CUTOFF
+        ? '<span>目前第 ' + CUTOFF + ' 名為 ' + cutScore + ' 分，領先 ' + (sum.score[i] - cutScore) + ' 分以上即安全</span>'
+        : '<span>距離第 ' + CUTOFF + ' 名（' + cutScore + ' 分）還差 ' + (cutScore - sum.score[i]) + ' 分</span>';
+    }
+    $("#focus").innerHTML = head +
+      '<div class="fgrid">' + box("應援榜", "gift") + box("人氣投票", "pop") + '</div>' +
+      '<div class="fhint">' + extra + '<button class="linkbtn" type="button" id="share">複製這位的分享連結</button></div>';
+  }
+
+  function renderList() {
+    const q = $("#q").value.trim().toLowerCase();
+    const match = k => !q || String(k + 1) === q || NAMES[k].toLowerCase().includes(q);
+    let headHtml = "", html = "";
+
+    if (view === "sum") {
+      headHtml = '<span>名次</span><span>號碼・名稱</span><span>總分</span><span>應援</span><span>投票</span>';
+      if (!ready("gift") || !ready("pop")) { $("#head").innerHTML = headHtml; $("#list").innerHTML = '<div class="empty">總積分需要兩個榜都讀到才能計算</div>'; $("#total").textContent = ""; return; }
+      const G = boards.gift, P = boards.pop, S = sumOf(G.rank, P.rank);
+      // order: total desc, then better gift+pop rank sum, then number
+      const ord = S.score.map((_, i) => i).sort((a, b) => S.score[b] - S.score[a] || (G.rank[a] + P.rank[a]) - (G.rank[b] + P.rank[b]) || a - b);
+      $("#total").textContent = "前 " + CUTOFF + " 名晉級";
+      ord.forEach((k, pos) => {
+        const isCut = pos === CUTOFF - 1;
+        if (!match(k)) return;
+        const r = S.rank[k], tied = S.rank.filter(x => x === r).length > 1;
+        const mv = baseSumRank ? baseSumRank[k] - r : 0;
+        html += '<div class="row' + (k + 1 === focus ? " me" : "") + (r === 1 ? " t1" : "") + (isCut && !q ? " cut" : "") + '" data-n="' + (k + 1) + '" tabindex="0" role="button">' +
+          '<div class="pos"><b>' + r + '</b>' + (tied ? '<span class="tie">並列</span>' : mvHtml(mv)) + '</div>' +
+          '<div class="name"><b>' + esc(NAMES[k]) + '</b><small>' + (k + 1) + ' 號</small></div>' +
+          '<div class="r score">' + S.score[k] + '</div>' +
+          '<div class="r pair"><b>' + pts(G.rank[k]) + '</b><small>第 ' + G.rank[k] + ' 名</small></div>' +
+          '<div class="r pair"><b>' + pts(P.rank[k]) + '</b><small>第 ' + P.rank[k] + ' 名</small></div></div>';
+        if (isCut && !q) html += '<div class="cutlbl">▲ 以上前 ' + CUTOFF + ' 名晉級實體徵選</div>';
+      });
+    } else {
+      const b = boards[view];
+      headHtml = '<span>名次</span><span>號碼・名稱</span><span>票數</span><span title="這次打開頁面之後增加的票數">開頁後</span><span>積分</span>';
+      if (!b.votes) { $("#head").innerHTML = headHtml; $("#list").innerHTML = '<div class="empty">' + (failing ? "讀取失敗，稍後自動重試" : "讀取中…") + '</div>'; $("#total").textContent = ""; return; }
+      $("#total").textContent = "總票數 " + fmt(b.votes.reduce((a, c) => a + c, 0));
+      const ord = b.votes.map((_, i) => i).sort((x, y) => b.rank[x] - b.rank[y]);
+      for (const k of ord) {
+        if (!match(k)) continue;
+        const r = b.rank[k], d = b.votes[k] - b.base[k];
+        const flash = b.prev && b.votes[k] !== b.prev[k];
+        html += '<div class="row' + (k + 1 === focus ? " me" : "") + (r === 1 ? " t1" : "") + (flash ? " flash" : "") + '" data-n="' + (k + 1) + '" tabindex="0" role="button">' +
+          '<div class="pos"><b>' + r + '</b>' + mvHtml(b.baseRank[k] - r) + '</div>' +
+          '<div class="name"><b>' + esc(NAMES[k]) + '</b><small>' + (k + 1) + ' 號</small></div>' +
+          '<div class="r v">' + fmt(b.votes[k]) + '</div>' +
+          '<div class="r d' + (d > 0 ? " plus" : "") + '">' + (d > 0 ? "+" + fmt(d) : "–") + '</div>' +
+          '<div class="r p">' + pts(r) + '</div></div>';
+      }
+    }
+    $("#head").innerHTML = headHtml;
+    $("#list").innerHTML = html || '<div class="empty">找不到符合的參賽者</div>';
+    requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll(".row.flash").forEach(r => r.classList.remove("flash"))));
+  }
+
+  const mvHtml = mv => mv > 0 ? '<span class="mv up">▲' + mv + '</span>' : mv < 0 ? '<span class="mv dn">▼' + (-mv) + '</span>' : "";
 
   function setFocus(n) {
     focus = n; store.set("kl_focus", n);
     try { history.replaceState(null, "", "#" + n); } catch (e) {}
-    if (votes) render();
+    render();
   }
 
   $("#list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) setFocus(+r.dataset.n); });
   $("#list").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".row")) { e.preventDefault(); setFocus(+e.target.dataset.n); } });
-  $("#q").addEventListener("input", () => { if (votes) render(); });
+  document.querySelector(".tabs").addEventListener("click", e => { const t = e.target.closest(".tab"); if (!t) return; view = t.dataset.view; store.set("kl_view", view); render(); });
+  $("#q").addEventListener("input", renderList);
   $("#refresh").addEventListener("click", load);
   $("#focus").addEventListener("click", e => {
     if (e.target.id !== "share") return;
@@ -248,15 +378,15 @@ footer a{color:var(--accent)}
   });
   window.addEventListener("hashchange", () => { const n = fromHash(); if (n && n !== focus) setFocus(n); });
 
-  function tick() {
+  setInterval(() => {
     if (document.hidden || loading) return;
     countdown--;
     if (countdown <= 0) load(); else renderStatus();
-  }
+  }, 1000);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && lastOk && Date.now() - lastOk > INTERVAL * 1000) load(); else renderStatus();
   });
-  timer = setInterval(tick, 1000);
+  render();
   load();
 })();
 </script>
